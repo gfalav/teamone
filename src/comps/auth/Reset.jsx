@@ -37,7 +37,7 @@ const Reset = () => {
                             error={formik.touched.email && Boolean(formik.errors.email)}
                             helperText={formik.touched.email && formik.errors.email}
                 />
-                <Button variant="contained" sx={{ mt: 2}}>Send</Button>
+                <Button type="submit" variant="contained" sx={{ mt: 2}}>Send</Button>
             </form>
             <Box m={2}
                 display='flex'

@@ -3,9 +3,13 @@ import { useFormik } from "formik"
 import * as Yup from 'yup'
 import LockOpenIcon from '@mui/icons-material/LockOpen'
 import { purple } from '@mui/material/colors'
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { auth } from "../fb/fb"
 
 const SignIn = () => {
+
+    const navigate = useNavigate()
 
     const validateSchema = Yup.object().shape({
         email: Yup.string().email('Enter a valid email').required('Is required'),
@@ -18,6 +22,19 @@ const SignIn = () => {
             password: 'pppppppp'
         },
         validationSchema: validateSchema,
+        onSubmit: async (values) => {
+            await signInWithEmailAndPassword(auth, values.email, values.password)
+                .then( (userCredential) => {
+                    // logged
+                    navigate('/')
+                })
+                .catch( (error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.log(errorCode, errorMessage)
+                    // ..
+                })
+        }
     })
 
     return(
@@ -47,7 +64,7 @@ const SignIn = () => {
                             helperText={formik.touched.password && formik.errors.password}
                             sx={{ mt: 1 }}
                 />
-                <Button variant="contained" sx={{ mt: 2}}>Send</Button>
+                <Button type="submit" variant="contained" sx={{ mt: 2}}>Send</Button>
             </form>
             <Box m={2}
                 display='flex'

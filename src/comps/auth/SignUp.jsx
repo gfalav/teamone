@@ -3,9 +3,14 @@ import { useFormik } from "formik"
 import * as Yup from 'yup'
 import LockOpenIcon from '@mui/icons-material/LockOpen'
 import { purple } from '@mui/material/colors'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { auth, db } from "../fb/fb"
+import { setDoc, doc } from "firebase/firestore"
 
 const SignUp = () => {
+
+    const navigate = useNavigate()
 
     const validateSchema = Yup.object().shape({
         name: Yup.string().max(25,'Too long'),
@@ -24,10 +29,27 @@ const SignUp = () => {
             passconf: 'pppppppp'
         },
         validationSchema: validateSchema,
+        onSubmit:  async (values) => {
+            await createUserWithEmailAndPassword(auth, values.email, values.password)
+                .then( async (userCredential) => {
+                    navigate('/')
+
+                    await setDoc( doc(db, 'User', userCredential.user.uid), { 
+                        name: values.name, 
+                        lastname: values.lastname,
+                        email: userCredential.user.email })
+                })
+                .catch( (error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.log(errorCode, errorMessage)
+                    // ..
+                })
+        }
     })
 
     return(
-        <Box id="loginRoot"
+        <Box id="SignUpRoot"
             maxWidth={450}
             m={2}
             display='flex'
@@ -83,7 +105,7 @@ const SignUp = () => {
                             helperText={formik.touched.passconf && formik.errors.passconf}
                             sx={{ mt: 1.5 }}
                 />
-                <Button variant="contained" sx={{ mt: 2}}>Send</Button>
+                <Button type="submit" variant="contained" sx={{ mt: 2}}>Send</Button>
             </form>
             <Box m={2}
                 display='flex'
